@@ -1,6 +1,15 @@
+import { useState, useEffect } from "react";
 import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
+import { Gauge } from "../components/gauge";
+import { FetchApi } from "../components/fetchApi";
 
 export const InstantAnalysis = () => {
+  const [datas, setDatas] = useState([]);
+
+  useEffect(() => {
+    setDatas(FetchApi());
+  }, []);
+
   // 顯示or隱藏圖表線段
   const onChangeAvgVoltage = (e) => {
     if (e.dataSeries.visible === undefined || e.dataSeries.visible) {
@@ -19,9 +28,9 @@ export const InstantAnalysis = () => {
   const options_voltage = {
     // 電壓折線圖
     theme: "light2",
-    animationEnabled: true,
-    zoomEnabled: true,
-    exportEnabled: true,
+    animationEnabled: true, // 初始動畫
+    zoomEnabled: true, // 縮放
+    exportEnabled: true, // 存成圖檔
     title: {
       text: "電壓分布圖",
       fontSize: 30,
@@ -41,7 +50,7 @@ export const InstantAnalysis = () => {
     data: [
       {
         type: "spline",
-        // name: "23",
+        name: "test",
         showInLegend: true,
         dataPoints: [
           { y: 158, label: "Jan" },
@@ -111,6 +120,7 @@ export const InstantAnalysis = () => {
       <div className="chart-wrap">
         <CanvasJSChart options={options_voltage} />
         <CanvasJSChart options={options_current} />
+        <Gauge soc="70" />
       </div>
     </div>
   );
