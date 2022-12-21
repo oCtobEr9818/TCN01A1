@@ -1,5 +1,4 @@
-export const Gauge = (soc) => {
-  console.log("test");
+export const Gauge = (props) => {
   const arr = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
   return (
@@ -7,16 +6,16 @@ export const Gauge = (soc) => {
       data-type="radial-gauge"
       data-width="300"
       data-height="300"
-      data-units="SOC(V)"
-      data-value={soc}
+      data-units="SOC"
+      data-value={props.soc}
       data-min-value="0"
       data-max-value="100"
       data-major-ticks={arr}
-      data-minor-ticks="10"
+      data-minor-ticks="5"
       data-stroke-ticks="true"
       data-highlights='[
         {"from": 70, "to": 100, "color": "rgba(200, 50, 50, .75)"}
-    ]'
+      ]'
       data-color-plate="#fff"
       data-border-shadow-width="0"
       data-borders="false"

@@ -79,3 +79,10 @@
   margin: 0 auto;
   padding-top: 4rem;
 }
+
+.container .chart .chart-wrap .wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}

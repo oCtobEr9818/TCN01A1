@@ -1,14 +1,69 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
+
 import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
 import { Gauge } from "../components/gauge";
-import { FetchApi } from "../components/fetchApi";
+import { Url } from "../components/api_url";
+import { formatDate } from "../components/formateDate";
 
 export const InstantAnalysis = () => {
-  const [datas, setDatas] = useState([]);
+  const [voltage, setVoltage] = useState([]);
+  const [current, setCurrent] = useState([]);
+  const [SOC, setSOC] = useState(0);
+  const [SOH, setSOH] = useState(0);
+  const [avgCellTemp, setAvgCellTemp] = useState(0);
+  const [count, setCount] = useState(0);
+
+  // 當作每筆資料的index
+  const addCount = () => {
+    setCount((count) => count + 1);
+  };
 
   useEffect(() => {
-    setDatas(FetchApi());
-  }, []);
+    // 每五秒獲取一筆資料
+    const interval = setInterval(() => {
+      addCount();
+      getData();
+    }, 5000);
+
+    const getData = async () => {
+      const datas = await axios.get(Url); // axios資料
+      const results = datas.data;
+
+      // 將資料push進array
+      setVoltage((prev) => [
+        ...prev,
+        {
+          x: count,
+          y: Number(results.SystemVolt) * 0.1, // 依據spec做數值調整
+          label: formatDate(results.UpdateTime),
+        },
+      ]);
+      setCurrent((prev) => [
+        ...prev,
+        {
+          x: count,
+          y: Number(results.SystemCurrent) - 20000, // 依據spec做數值調整
+          label: formatDate(results.UpdateTime),
+        },
+      ]);
+
+      setSOC(Math.round(results.SOC * 0.1 * 100) / 100);
+      setSOH(results.SOH * 0.1);
+      setAvgCellTemp(results.AvgCellTemp - 50);
+    };
+
+    // 清除Interval
+    return () => clearInterval(interval);
+  }, [count]);
+
+  // 維持40筆資料
+  if (voltage.length > 40) {
+    voltage.shift();
+  }
+  if (current.length > 40) {
+    current.shift();
+  }
 
   // 顯示or隱藏圖表線段
   const onChangeAvgVoltage = (e) => {
@@ -25,10 +80,9 @@ export const InstantAnalysis = () => {
   // Canvas chart
   const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
+  // 電壓折線圖
   const options_voltage = {
-    // 電壓折線圖
     theme: "light2",
-    animationEnabled: true, // 初始動畫
     zoomEnabled: true, // 縮放
     exportEnabled: true, // 存成圖檔
     title: {
@@ -50,30 +104,16 @@ export const InstantAnalysis = () => {
     data: [
       {
         type: "spline",
-        name: "test",
+        name: "AvgCellVolt",
         showInLegend: true,
-        dataPoints: [
-          { y: 158, label: "Jan" },
-          { y: 153, label: "Feb" },
-          { y: 156, label: "Mar" },
-          { y: 123, label: "Apr" },
-          { y: 142, label: "May" },
-          { y: 185, label: "Jun" },
-          { y: 146, label: "Jul" },
-          { y: 146, label: "Aug" },
-          { y: 150, label: "Sep" },
-          { y: 107, label: "Oct" },
-          { y: 181, label: "Nov" },
-          { y: 150, label: "Dec" },
-        ],
+        dataPoints: voltage,
       },
     ],
   };
 
+  // 電流折線圖
   const options_current = {
-    // 電流折線圖
     theme: "light2",
-    animationEnabled: true,
     zoomEnabled: true,
     exportEnabled: true,
     title: {
@@ -95,22 +135,9 @@ export const InstantAnalysis = () => {
     data: [
       {
         type: "spline",
-        // name: "23",
+        name: "SystemCurrent",
         showInLegend: true,
-        dataPoints: [
-          { y: 155, label: "Jan" },
-          { y: 150, label: "Feb" },
-          { y: 152, label: "Mar" },
-          { y: 148, label: "Apr" },
-          { y: 142, label: "May" },
-          { y: 150, label: "Jun" },
-          { y: 146, label: "Jul" },
-          { y: 149, label: "Aug" },
-          { y: 153, label: "Sep" },
-          { y: 158, label: "Oct" },
-          { y: 154, label: "Nov" },
-          { y: 150, label: "Dec" },
-        ],
+        dataPoints: current,
       },
     ],
   };
@@ -120,7 +147,12 @@ export const InstantAnalysis = () => {
       <div className="chart-wrap">
         <CanvasJSChart options={options_voltage} />
         <CanvasJSChart options={options_current} />
-        <Gauge soc="70" />
+        <Gauge soc={SOC} />
+
+        <div className="wrap">
+          <p>電池健康度：{SOH}%</p>
+          <p>電芯平均溫度：{avgCellTemp}℃</p>
+        </div>
       </div>
     </div>
   );
