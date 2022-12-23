@@ -1,32 +1,16 @@
-export const Gauge = (props) => {
-  const arr = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+import GaugeChart from "react-gauge-chart";
 
+export const Gauge_chart = (props) => {
   return (
-    <canvas
-      data-type="radial-gauge"
-      data-width="300"
-      data-height="300"
-      data-units="SOC"
-      data-value={props.soc}
-      data-min-value="0"
-      data-max-value="100"
-      data-major-ticks={arr}
-      data-minor-ticks="5"
-      data-stroke-ticks="true"
-      data-highlights='[
-        {"from": 70, "to": 100, "color": "rgba(200, 50, 50, .75)"}
-      ]'
-      data-color-plate="#fff"
-      data-border-shadow-width="0"
-      data-borders="false"
-      data-needle-type="arrow"
-      data-needle-width="2"
-      data-needle-circle-size="7"
-      data-needle-circle-outer="true"
-      data-needle-circle-inner="false"
-      data-animation-duration="1500"
-      data-animation-rule="linear"
-      id="gauge"
-    ></canvas>
+    <GaugeChart
+      id={props.id}
+      nrOfLevels={10} // 刻度數目
+      colors={["#3b3", "#f20"]} // 刻度左到右漸層顏色
+      textColor={"#000"} // %數字體顏色
+      arcWidth={0.3} // 刻度長度
+      percent={props.value} // 數值
+      animate={false}
+      formatTextValue={(valueUnit) => valueUnit + props.unit}
+    />
   );
 };

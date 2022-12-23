@@ -2,12 +2,21 @@
   padding: 0;
   margin: 0;
   list-style: none;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .container {
   width: 100%;
   height: auto;
   /* position: relative; */
+}
+
+.container .Home {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* 選單 */
@@ -59,7 +68,7 @@
 }
 
 
-/* chart */
+/* 即時分析 chart */
 .container .chart {
   width: 75%;
   height: 100vh;
@@ -69,15 +78,17 @@
 }
 
 .container .chart .chart-wrap {
-  height: 100%;
   display: grid;
+  height: 50%;
   grid-template-columns: 50% 50%;
   column-gap: 50px;
+}
+.container .chart .chart-wrap:nth-child(2) {
+  grid-template-columns: 33% 33% 33%;
 }
 
 .container .chart .chart-wrap #gauge {
   margin: 0 auto;
-  padding-top: 4rem;
 }
 
 .container .chart .chart-wrap .wrap {
@@ -85,4 +96,17 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+}
+
+.container .chart .chart-wrap .wrap h2 {
+  margin-bottom: 1rem;
+}
+
+
+/* 歷史分析 */
+.container .historyAnalysis {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

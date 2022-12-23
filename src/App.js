@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Nav } from "./components/nav";
+import Home from "./pages/home";
 import { InstantAnalysis } from "./pages/instant_analysis";
+import { HistoryAnalysis } from "./pages/history_analysis";
 
 function App() {
   return (
@@ -10,9 +12,9 @@ function App() {
           <Nav />
 
           <Routes>
-            <Route exact path="/" element="" />
+            <Route exact path="/" element={<Home />} />
             <Route path="/instantAnalysis" element={<InstantAnalysis />} />
-            <Route path="/historyAnalysis" />
+            <Route path="/historyAnalysis" element={<HistoryAnalysis />} />
           </Routes>
         </BrowserRouter>
       </div>

@@ -1,7 +1,7 @@
-const HistoryAnalysis = () => {
+export const HistoryAnalysis = () => {
   return (
     <div className="historyAnalysis">
-      <div>123</div>
+      <h1>歷史分析</h1>
     </div>
   );
 };
