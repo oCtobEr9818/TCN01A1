@@ -29,7 +29,7 @@ html, body {
 /* ************************************************************* */
 /* 選單 */
 .App .container #collapse-control {
-  z-index: 2;
+  z-index: 10;
   display: none;
   position: absolute;
   top: 0;
@@ -202,9 +202,41 @@ html, body {
 
 /* 歷史分析 */
 .App .container .historyAnalysis {
-  width: 100%;
+  width: 75%;
   height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 22rem;
+}
+
+.App .container .historyAnalysis .button-wrap {
+  width: 300px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  margin-top: 3rem;
+  background: #f0f0f0;
+}
+
+.App .container .historyAnalysis .button-wrap input {
+  width: 180px;
+  height: 25px;
+  padding: 10px;
+}
+
+.App .container .historyAnalysis .button-wrap button {
+  width: 70px;
+  height: 25px;
+}
+
+.App .container .historyAnalysis .data-wrap {
+  margin-top: 1rem;
+}
+
+.App .container .historyAnalysis .data-wrap ul {
+  line-height: 1.5;
+}
+
+.App .container .historyAnalysis .chart-wrap {
+  width: 50%;
+  margin-top: 2rem;
 }

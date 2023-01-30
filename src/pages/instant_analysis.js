@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import BatteryGauge from "react-battery-gauge";
+import axios from "axios";
+import { v4 } from "uuid";
 
 import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
 import { Gauge } from "../components/charts/gauge";
@@ -8,6 +9,7 @@ import { Url } from "../components/api_url";
 import { formatDate } from "../components/formateDate";
 import { minValue } from "../components/minValue";
 import { maxValue } from "../components/maxValue";
+import { lineDisplay } from "../components/charts/chart_tool/lineDisplay";
 
 export const InstantAnalysis = () => {
   const [voltage, setVoltage] = useState([]);
@@ -21,6 +23,7 @@ export const InstantAnalysis = () => {
   const [minCellTemp, setMinCellTemp] = useState(0);
   const [powerStatus, setPowerStatus] = useState("");
   const [heartBeats, setHeartBeats] = useState(0);
+  const [getTime, setGetTime] = useState(0);
   const [count, setCount] = useState(0);
 
   // axios資料
@@ -76,6 +79,7 @@ export const InstantAnalysis = () => {
 
       setPowerStatus(results.MBMU.PowerStatus); // 電源狀態
       setHeartBeats(results.MBMU.Heartbeats); // 電源心跳
+      setGetTime(formatDate(results.UpdateTime)); // 最新資料時間
     } catch (error) {
       console.log(error);
     }
@@ -121,18 +125,6 @@ export const InstantAnalysis = () => {
     }
   };
 
-  // 顯示or隱藏圖表線段
-  const onChangeLineDisplay = (e) => {
-    if (e.dataSeries.visible === undefined || e.dataSeries.visible) {
-      e.dataSeries.visible = false;
-      e.dataSeries.toolTipContent = null;
-    } else {
-      e.dataSeries.visible = true;
-    }
-    console.log(e.chart);
-    e.chart.render();
-  };
-
   // CanvasJS chart
   const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
@@ -154,7 +146,7 @@ export const InstantAnalysis = () => {
       fontFamily: "Arial",
       cursor: "pointer",
       horizontalAlign: "center",
-      itemclick: onChangeLineDisplay,
+      itemclick: lineDisplay,
     },
     toolTip: {
       shared: true,
@@ -181,28 +173,12 @@ export const InstantAnalysis = () => {
     },
     axisY: {
       title: "電流(A)",
-      viewportMinimum:
-        Math.min(
-          ...[
-            minValue(current),
-            minValue(chargeCurrent),
-            minValue(disChargeCurrent),
-          ]
-        ) - 2000,
-      viewportMaximum:
-        Math.max(
-          ...[
-            maxValue(current),
-            maxValue(chargeCurrent),
-            maxValue(disChargeCurrent),
-          ]
-        ) + 2000,
     },
     legend: {
       fontFamily: "Arial",
       cursor: "pointer",
       horizontalAlign: "center",
-      itemclick: onChangeLineDisplay,
+      itemclick: lineDisplay,
     },
     toolTip: {
       shared: true,
@@ -238,16 +214,18 @@ export const InstantAnalysis = () => {
 
       <div className="data-table">
         <ul>
-          <li>電源狀態</li>
-          <li>最高電芯溫度</li>
-          <li>最低電芯溫度</li>
-          <li>HeartBeats</li>
+          <li key={v4()}>電源狀態</li>
+          <li key={v4()}>最高電芯溫度</li>
+          <li key={v4()}>最低電芯溫度</li>
+          <li key={v4()}>HeartBeats</li>
+          <li key={v4()}>最後更新時間</li>
         </ul>
         <ul>
-          <li>{handlePowerStatus(powerStatus)}</li>
-          <li>{maxCellTemp}℃</li>
-          <li>{minCellTemp}℃</li>
-          <li>{heartBeats}</li>
+          <li key={v4()}>{handlePowerStatus(powerStatus)}</li>
+          <li key={v4()}>{maxCellTemp}℃</li>
+          <li key={v4()}>{minCellTemp}℃</li>
+          <li key={v4()}>{heartBeats}</li>
+          <li key={v4()}>{getTime}</li>
         </ul>
       </div>
 
