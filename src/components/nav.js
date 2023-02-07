@@ -14,6 +14,10 @@ export const Nav = () => {
     },
     {
       path: "/historyAnalysis",
+      title: "歷史分析",
+    },
+    {
+      path: "/readCSV",
       title: "讀取.csv檔",
     },
   ];

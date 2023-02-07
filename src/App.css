@@ -200,8 +200,8 @@ html, body {
 }
 /* *************************************************************** */
 
-/* 歷史分析 */
-.App .container .historyAnalysis {
+/* 讀取.csv檔 */
+.App .container .read_csv {
   width: 75%;
   height: 100vh;
   position: absolute;
@@ -209,7 +209,7 @@ html, body {
   left: 22rem;
 }
 
-.App .container .historyAnalysis .button-wrap {
+.App .container .read_csv .button-wrap {
   width: 300px;
   display: flex;
   align-items: center;
@@ -217,26 +217,26 @@ html, body {
   background: #f0f0f0;
 }
 
-.App .container .historyAnalysis .button-wrap input {
+.App .container .read_csv .button-wrap input {
   width: 180px;
   height: 25px;
   padding: 10px;
 }
 
-.App .container .historyAnalysis .button-wrap button {
+.App .container .read_csv .button-wrap button {
   width: 70px;
   height: 25px;
 }
 
-.App .container .historyAnalysis .data-wrap {
+.App .container .read_csv .data-wrap {
   margin-top: 1rem;
 }
 
-.App .container .historyAnalysis .data-wrap ul {
+.App .container .read_csv .data-wrap ul {
   line-height: 1.5;
 }
 
-.App .container .historyAnalysis .chart-wrap {
+.App .container .read_csv .chart-wrap {
   width: 50%;
   margin-top: 2rem;
 }
