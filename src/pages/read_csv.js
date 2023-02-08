@@ -32,37 +32,113 @@ export const ReadCSV = () => {
     return arrSOC;
   };
 
-  // 平均SOC
-  const avgSOC = () => {
+  // 圖表-平均SOC
+  const handleAvgSOC = () => {
     let arr = getChartData();
     let arrDatas = []; // 00~17點的資料
-    let arrProcess = []; // 資料暫存區
-    let arrResults = []; // 平均後的資料
+    let avgProcess = []; // 資料暫存區
+    let results = []; // 平均後的資料
 
     for (let i = 0; i < 18; i++) {
       arrDatas[i] = arr.filter(
         (item) => item.label.slice(12, 14) === (i < 10 ? "0" + i : i.toString())
       );
 
-      arrProcess.push(0);
+      avgProcess.push(0);
     }
 
     for (let i = 0; i < 18; i++) {
       arrDatas[i].forEach((data) => {
-        arrProcess[i] += data.y / arrDatas[i].length;
+        avgProcess[i] += data.y / arrDatas[i].length;
       });
     }
 
-    const process = arrProcess.map((data) => Math.round(data * 100) / 100);
+    const process = avgProcess.map((data) => Math.round(data * 100) / 100);
 
     process.forEach((item, index) => {
-      arrResults.push({
+      results.push({
         y: item,
         label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
       });
     });
 
-    return arrResults;
+    return results;
+  };
+
+  // 圖表-最大SOC
+  const handleMaxSOC = () => {
+    let arr = getChartData();
+    let arrDatas = []; // 00~17點的資料
+    let maxProcess = []; // 資料暫存區
+    let results = [];
+
+    for (let i = 0; i < 18; i++) {
+      arrDatas[i] = arr.filter(
+        (item) => item.label.slice(12, 14) === (i < 10 ? "0" + i : i.toString())
+      );
+
+      maxProcess.push([]);
+    }
+
+    for (let i = 0; i < 18; i++) {
+      arrDatas[i].forEach((e) => {
+        maxProcess[i].push(e.y);
+      });
+    }
+
+    maxProcess.forEach((item, index) => {
+      if (item.length !== 0) {
+        results.push({
+          y: Math.max(...item),
+          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
+        });
+      } else {
+        results.push({
+          y: 0,
+          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
+        });
+      }
+    });
+
+    return results;
+  };
+
+  // 圖表-最小SOC
+  const handleMinSOC = () => {
+    let arr = getChartData();
+    let arrDatas = []; // 00~17點的資料
+    let minProcess = []; // 資料暫存區
+    let results = [];
+
+    for (let i = 0; i < 18; i++) {
+      arrDatas[i] = arr.filter(
+        (item) => item.label.slice(12, 14) === (i < 10 ? "0" + i : i.toString())
+      );
+
+      minProcess.push([]);
+    }
+
+    for (let i = 0; i < 18; i++) {
+      arrDatas[i].forEach((e) => {
+        minProcess[i].push(e.y);
+      });
+    }
+
+    minProcess.forEach((item, index) => {
+      if (item.length !== 0) {
+        results.push({
+          y: Math.min(...item),
+          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
+        });
+      } else {
+        results.push({
+          y: 0,
+          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
+        });
+      }
+    });
+
+    return results;
   };
 
   // 取得最大SOC值
@@ -132,10 +208,24 @@ export const ReadCSV = () => {
     data: [
       {
         type: "spline",
-        toolTipContent: "Time：{label}<br />{name}：{y} %",
-        name: "AvgSOC",
+        toolTipContent: "{name}：{y} %",
+        name: "最大SOC",
         showInLegend: true,
-        dataPoints: avgSOC(),
+        dataPoints: handleMaxSOC(),
+      },
+      {
+        type: "spline",
+        toolTipContent: "Time：{label}<br />{name}：{y} %",
+        name: "平均SOC",
+        showInLegend: true,
+        dataPoints: handleAvgSOC(),
+      },
+      {
+        type: "spline",
+        toolTipContent: "{name}：{y} %",
+        name: "最小SOC",
+        showInLegend: true,
+        dataPoints: handleMinSOC(),
       },
     ],
   };
