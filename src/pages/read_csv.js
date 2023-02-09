@@ -32,113 +32,57 @@ export const ReadCSV = () => {
     return arrSOC;
   };
 
+  const HOUR_COUNT = 18;
+  const BASE_DATE = "2023/01/10";
   // 圖表-平均SOC
   const handleAvgSOC = () => {
     let arr = getChartData();
-    let arrDatas = []; // 00~17點的資料
-    let avgProcess = []; // 資料暫存區
-    let results = []; // 平均後的資料
+    let avgProcess = Array(HOUR_COUNT).fill(0);
+    let results = [];
 
-    for (let i = 0; i < 18; i++) {
-      arrDatas[i] = arr.filter(
-        (item) => item.label.slice(12, 14) === (i < 10 ? "0" + i : i.toString())
-      );
-
-      avgProcess.push(0);
+    for (let i = 0; i < HOUR_COUNT; i++) {
+      const hour = i < 10 ? "0" + i : i.toString();
+      const items = arr.filter((item) => item.label.slice(12, 14) === hour);
+      items.forEach((data) => (avgProcess[i] += data.y / items.length));
     }
 
-    for (let i = 0; i < 18; i++) {
-      arrDatas[i].forEach((data) => {
-        avgProcess[i] += data.y / arrDatas[i].length;
-      });
-    }
+    const Process = avgProcess.map((data) => Math.round(data * 100) / 100);
 
-    const process = avgProcess.map((data) => Math.round(data * 100) / 100);
-
-    process.forEach((item, index) => {
+    Process.forEach((item, index) => {
       results.push({
         y: item,
-        label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
+        label: `${BASE_DATE}, ${index < 10 ? "0" + index : index}:00`,
       });
     });
 
     return results;
   };
 
+  // 計算最大或最小SOC
+  const getMaxOrMin = (arr, isMax = true) => {
+    let results = [];
+
+    for (let i = 0; i < HOUR_COUNT; i++) {
+      const hour = i < 10 ? "0" + i : i.toString();
+      const items = arr.filter((item) => item.label.slice(12, 14) === hour);
+      const hourMaxOrMin =
+        items.length !== 0
+          ? (isMax ? Math.max : Math.min)(...items.map((e) => e.y))
+          : 0;
+      results.push({ y: hourMaxOrMin, label: `${BASE_DATE}, ${hour}:00` });
+    }
+
+    return results;
+  };
   // 圖表-最大SOC
   const handleMaxSOC = () => {
     let arr = getChartData();
-    let arrDatas = []; // 00~17點的資料
-    let maxProcess = []; // 資料暫存區
-    let results = [];
-
-    for (let i = 0; i < 18; i++) {
-      arrDatas[i] = arr.filter(
-        (item) => item.label.slice(12, 14) === (i < 10 ? "0" + i : i.toString())
-      );
-
-      maxProcess.push([]);
-    }
-
-    for (let i = 0; i < 18; i++) {
-      arrDatas[i].forEach((e) => {
-        maxProcess[i].push(e.y);
-      });
-    }
-
-    maxProcess.forEach((item, index) => {
-      if (item.length !== 0) {
-        results.push({
-          y: Math.max(...item),
-          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
-        });
-      } else {
-        results.push({
-          y: 0,
-          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
-        });
-      }
-    });
-
-    return results;
+    return getMaxOrMin(arr);
   };
-
   // 圖表-最小SOC
   const handleMinSOC = () => {
     let arr = getChartData();
-    let arrDatas = []; // 00~17點的資料
-    let minProcess = []; // 資料暫存區
-    let results = [];
-
-    for (let i = 0; i < 18; i++) {
-      arrDatas[i] = arr.filter(
-        (item) => item.label.slice(12, 14) === (i < 10 ? "0" + i : i.toString())
-      );
-
-      minProcess.push([]);
-    }
-
-    for (let i = 0; i < 18; i++) {
-      arrDatas[i].forEach((e) => {
-        minProcess[i].push(e.y);
-      });
-    }
-
-    minProcess.forEach((item, index) => {
-      if (item.length !== 0) {
-        results.push({
-          y: Math.min(...item),
-          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
-        });
-      } else {
-        results.push({
-          y: 0,
-          label: `2023/01/10, ${index < 10 ? "0" + index : index}:00`,
-        });
-      }
-    });
-
-    return results;
+    return getMaxOrMin(arr, false);
   };
 
   // 取得最大SOC值
@@ -208,14 +152,14 @@ export const ReadCSV = () => {
     data: [
       {
         type: "spline",
-        toolTipContent: "{name}：{y} %",
+        toolTipContent: "Time：{label}<br />{name}：{y} %",
         name: "最大SOC",
         showInLegend: true,
         dataPoints: handleMaxSOC(),
       },
       {
         type: "spline",
-        toolTipContent: "Time：{label}<br />{name}：{y} %",
+        toolTipContent: "{name}：{y} %",
         name: "平均SOC",
         showInLegend: true,
         dataPoints: handleAvgSOC(),
@@ -240,8 +184,8 @@ export const ReadCSV = () => {
       <div className="data-wrap">
         <ul>
           <li>最大SOC：{getMaxSOC()}%</li>
-          <li>最小SOC：{getMinSOC()}%</li>
           <li>平均SOC：{getAvgSOC()}%</li>
+          <li>最小SOC：{getMinSOC()}%</li>
         </ul>
       </div>
 
