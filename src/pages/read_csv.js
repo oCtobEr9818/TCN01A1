@@ -29,20 +29,50 @@ export const ReadCSV = () => {
     arrSOC.shift();
     arrSOC.pop();
 
+    const deleteItem = arrSOC.findIndex((e) => e.y === 2000);
+    arrSOC.splice(deleteItem, 1);
+
     return arrSOC;
   };
 
   const HOUR_COUNT = 18;
   const BASE_DATE = "2023/01/10";
-  // 圖表-平均SOC
-  const handleAvgSOC = () => {
-    let arr = getChartData();
-    let avgProcess = Array(HOUR_COUNT).fill(0);
+  const CHART_DATA = getChartData();
+  const ENTRIES_CHART_DATA = Object.entries(CHART_DATA);
+  // 計算最大或最小SOC
+  const getMaxOrMinSOC = (arr, isMax = true) => {
     let results = [];
 
     for (let i = 0; i < HOUR_COUNT; i++) {
       const hour = i < 10 ? "0" + i : i.toString();
       const items = arr.filter((item) => item.label.slice(12, 14) === hour);
+      const hourMaxOrMin =
+        items.length !== 0
+          ? (isMax ? Math.max : Math.min)(...items.map((e) => e.y))
+          : 0;
+      results.push({ y: hourMaxOrMin, label: `${BASE_DATE}, ${hour}:00` });
+    }
+
+    return results;
+  };
+  // 折線圖-最大SOC
+  const handleMaxSOC = () => {
+    return getMaxOrMinSOC(CHART_DATA);
+  };
+  // 折線圖-最小SOC
+  const handleMinSOC = () => {
+    return getMaxOrMinSOC(CHART_DATA, false);
+  };
+  // 折線圖-平均SOC
+  const handleAvgSOC = () => {
+    let avgProcess = Array(HOUR_COUNT).fill(0);
+    let results = [];
+
+    for (let i = 0; i < HOUR_COUNT; i++) {
+      const hour = i < 10 ? "0" + i : i.toString();
+      const items = CHART_DATA.filter(
+        (item) => item.label.slice(12, 14) === hour
+      );
       items.forEach((data) => (avgProcess[i] += data.y / items.length));
     }
 
@@ -58,41 +88,13 @@ export const ReadCSV = () => {
     return results;
   };
 
-  // 計算最大或最小SOC
-  const getMaxOrMin = (arr, isMax = true) => {
-    let results = [];
-
-    for (let i = 0; i < HOUR_COUNT; i++) {
-      const hour = i < 10 ? "0" + i : i.toString();
-      const items = arr.filter((item) => item.label.slice(12, 14) === hour);
-      const hourMaxOrMin =
-        items.length !== 0
-          ? (isMax ? Math.max : Math.min)(...items.map((e) => e.y))
-          : 0;
-      results.push({ y: hourMaxOrMin, label: `${BASE_DATE}, ${hour}:00` });
-    }
-
-    return results;
-  };
-  // 圖表-最大SOC
-  const handleMaxSOC = () => {
-    let arr = getChartData();
-    return getMaxOrMin(arr);
-  };
-  // 圖表-最小SOC
-  const handleMinSOC = () => {
-    let arr = getChartData();
-    return getMaxOrMin(arr, false);
-  };
-
   // 取得最大SOC值
   const getMaxSOC = () => {
     let arrMaxSOC = [];
 
-    parseCsv.forEach((item) => {
-      arrMaxSOC.push(Math.round(item[8] * 0.1 * 100) / 100);
+    ENTRIES_CHART_DATA.forEach((item) => {
+      arrMaxSOC.push(Math.round(item[1].y * 100) / 100);
     });
-    arrMaxSOC.pop();
 
     return Math.max(...arrMaxSOC);
   };
@@ -100,10 +102,9 @@ export const ReadCSV = () => {
   const getMinSOC = () => {
     let arrMinSOC = [];
 
-    parseCsv.forEach((item) => {
-      arrMinSOC.push(Math.round(item[8] * 0.1 * 100) / 100);
+    ENTRIES_CHART_DATA.forEach((item) => {
+      arrMinSOC.push(Math.round(item[1].y * 100) / 100);
     });
-    arrMinSOC.pop();
 
     return Math.min(...arrMinSOC);
   };
@@ -112,15 +113,12 @@ export const ReadCSV = () => {
     let sum = 0;
     let count = 0;
 
-    parseCsv.forEach((item) => {
-      if ((item[8] !== undefined) | Number) {
-        sum += Number(item[8]);
+    ENTRIES_CHART_DATA.forEach((item) => {
+      if ((item[1].y !== undefined) | Number) {
+        sum += Number(item[1].y);
         count++;
       }
     });
-
-    sum -= Number("0x22"); // 扣掉Array[0]的"0x22"
-    count--; // 扣掉Array[0]的"0x22"的index
 
     const result = Math.round((sum / count) * 100) / 100;
     return result;
