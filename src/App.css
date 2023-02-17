@@ -237,6 +237,10 @@ html, body {
 }
 
 .App .container .read_csv .chart-wrap {
-  width: 50%;
-  margin-top: 2rem;
+  width: 100%;
+  margin: 2rem 0 0;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  column-gap: 50px;
 }
+

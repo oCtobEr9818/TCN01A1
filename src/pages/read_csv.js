@@ -35,10 +35,53 @@ export const ReadCSV = () => {
     return arrSOC;
   };
 
+  // ******************************************************************************
+  //
+  const stepLine_chart = () => {
+    let arrStepLine = [];
+    let results = [];
+
+    parseCsv.forEach((data) => {
+      arrStepLine.push([data[0], data[5]]);
+    });
+
+    // 移除不需要資料項目
+    arrStepLine.shift();
+    arrStepLine.pop();
+    arrStepLine.forEach((item, index) => {
+      if (item[0].slice(0, 10) !== "01/10/2023") {
+        arrStepLine.splice(index, 1);
+      }
+    });
+
+    // 比對array前後值是否相同
+    let prevValue = [null, null]; // [time, state]
+
+    arrStepLine.forEach((currentValue) => {
+      if (prevValue[1] !== null && prevValue[1] !== currentValue[1]) {
+        results.push(
+          {
+            label: prevValue[0],
+            y: Number(prevValue[1]),
+          },
+          {
+            label: currentValue[0],
+            y: Number(currentValue[1]),
+          }
+        );
+      }
+      prevValue = currentValue;
+    });
+
+    return results;
+  };
+
+  // ******************************************************************************
+
   const HOUR_COUNT = 18;
   const BASE_DATE = "2023/01/10";
-  const CHART_DATA = getChartData();
-  const ENTRIES_CHART_DATA = Object.entries(CHART_DATA);
+  const CHART_DATA = getChartData(); // For圖表-最大、最小、平均SOC使用
+  const ENTRIES_CHART_DATA = Object.entries(CHART_DATA); // For最大、最小、平均SOC使用
   // 計算最大或最小SOC
   const getMaxOrMinSOC = (arr, isMax = true) => {
     let results = [];
@@ -48,7 +91,9 @@ export const ReadCSV = () => {
       const items = arr.filter((item) => item.label.slice(12, 14) === hour);
       const hourMaxOrMin =
         items.length !== 0
-          ? (isMax ? Math.max : Math.min)(...items.map((e) => e.y))
+          ? (isMax ? Math.max : Math.min)(
+              ...items.map((e) => (e.y === 102.3 ? 0 : e.y))
+            )
           : 0;
       results.push({ y: hourMaxOrMin, label: `${BASE_DATE}, ${hour}:00` });
     }
@@ -73,7 +118,10 @@ export const ReadCSV = () => {
       const items = CHART_DATA.filter(
         (item) => item.label.slice(12, 14) === hour
       );
-      items.forEach((data) => (avgProcess[i] += data.y / items.length));
+      items.forEach((data) => {
+        const judge_data = data.y === 102.3 ? 0 : data.y;
+        avgProcess[i] += judge_data / items.length;
+      });
     }
 
     const Process = avgProcess.map((data) => Math.round(data * 100) / 100);
@@ -93,7 +141,9 @@ export const ReadCSV = () => {
     let arrMaxSOC = [];
 
     ENTRIES_CHART_DATA.forEach((item) => {
-      arrMaxSOC.push(Math.round(item[1].y * 100) / 100);
+      arrMaxSOC.push(
+        Math.round((item[1].y === 102.3 ? 0 : item[1].y) * 100) / 100
+      );
     });
 
     return Math.max(...arrMaxSOC);
@@ -114,8 +164,8 @@ export const ReadCSV = () => {
     let count = 0;
 
     ENTRIES_CHART_DATA.forEach((item) => {
-      if ((item[1].y !== undefined) | Number) {
-        sum += Number(item[1].y);
+      if (item[1].y !== (undefined || null)) {
+        sum += item[1].y === 102.3 ? 0 : item[1].y;
         count++;
       }
     });
@@ -137,6 +187,7 @@ export const ReadCSV = () => {
     },
     axisY: {
       title: "(%)",
+      viewportMinimum: -20,
     },
     legend: {
       fontFamily: "Arial",
@@ -150,6 +201,7 @@ export const ReadCSV = () => {
     data: [
       {
         type: "spline",
+        axisYIndex: 0,
         toolTipContent: "Time：{label}<br />{name}：{y} %",
         name: "最大SOC",
         showInLegend: true,
@@ -157,6 +209,7 @@ export const ReadCSV = () => {
       },
       {
         type: "spline",
+        axisYIndex: 0,
         toolTipContent: "{name}：{y} %",
         name: "平均SOC",
         showInLegend: true,
@@ -164,10 +217,62 @@ export const ReadCSV = () => {
       },
       {
         type: "spline",
+        axisYIndex: 0,
         toolTipContent: "{name}：{y} %",
         name: "最小SOC",
         showInLegend: true,
         dataPoints: handleMinSOC(),
+      },
+    ],
+  };
+
+  const options_stepline = {
+    theme: "light2",
+    zoomEnabled: true, // 縮放
+    exportEnabled: true, // 存成圖檔
+    title: {
+      text: "系統狀態",
+      fontSize: 30,
+    },
+    axisY: {
+      title: "",
+      viewportMinimum: -2,
+      // labelFormatter: function (status) {
+      //   switch (status) {
+      //     case 0:
+      //       return "初始化中" + status.value;
+      //     case 1:
+      //       return "正常" + status.value;
+      //     case 2:
+      //       return "滿充，SOC 100%" + status.value;
+      //     case 3:
+      //       return "滿充，SOC 0%" + status.value;
+      //     case 4:
+      //       return "系統警告" + status.value;
+      //     case 5:
+      //       return "系統錯誤" + status.value;
+      //     default:
+      //       return;
+      //   }
+      // },
+    },
+    legend: {
+      fontFamily: "Arial",
+      cursor: "pointer",
+      horizontalAlign: "center",
+      itemclick: lineDisplay,
+    },
+    toolTip: {
+      shared: true,
+    },
+    data: [
+      {
+        type: "stepLine",
+        axisYIndex: 1,
+        toolTipContent: "{label}</br >{name}：{y}",
+        name: "State",
+        showInLegend: true,
+        dataPoints: stepLine_chart(),
       },
     ],
   };
@@ -189,6 +294,7 @@ export const ReadCSV = () => {
 
       <div className="chart-wrap">
         <CanvasJSChart options={options} />
+        <CanvasJSChart options={options_stepline} />
       </div>
     </div>
   );
