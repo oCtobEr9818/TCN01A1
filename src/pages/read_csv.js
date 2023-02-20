@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
 import { papaparseData } from "../components/papa_parse";
@@ -34,11 +34,11 @@ export const ReadCSV = () => {
 
     return arrSOC;
   };
-
   // ******************************************************************************
-  //
+  // 系統狀態方波圖
   const stepLine_chart = () => {
     let arrStepLine = [];
+    let storage = [];
     let results = [];
 
     parseCsv.forEach((data) => {
@@ -59,7 +59,7 @@ export const ReadCSV = () => {
 
     arrStepLine.forEach((currentValue) => {
       if (prevValue[1] !== null && prevValue[1] !== currentValue[1]) {
-        results.push(
+        storage.push(
           {
             label: prevValue[0],
             y: Number(prevValue[1]),
@@ -73,6 +73,18 @@ export const ReadCSV = () => {
       prevValue = currentValue;
     });
 
+    // 將資料繪製成方波
+    storage.forEach((data, index) => {
+      if (index % 2 !== 0) {
+        results.push({
+          ...data,
+          x: index - 1,
+        });
+      } else {
+        results.push(data);
+      }
+    });
+
     return results;
   };
 
@@ -80,8 +92,9 @@ export const ReadCSV = () => {
 
   const HOUR_COUNT = 18;
   const BASE_DATE = "2023/01/10";
-  const CHART_DATA = getChartData(); // For圖表-最大、最小、平均SOC使用
+  const CHART_DATA = getChartData();
   const ENTRIES_CHART_DATA = Object.entries(CHART_DATA); // For最大、最小、平均SOC使用
+
   // 計算最大或最小SOC
   const getMaxOrMinSOC = (arr, isMax = true) => {
     let results = [];
@@ -109,7 +122,7 @@ export const ReadCSV = () => {
     return getMaxOrMinSOC(CHART_DATA, false);
   };
   // 折線圖-平均SOC
-  const handleAvgSOC = () => {
+  const handleAvgSOC = useMemo(() => {
     let avgProcess = Array(HOUR_COUNT).fill(0);
     let results = [];
 
@@ -134,7 +147,7 @@ export const ReadCSV = () => {
     });
 
     return results;
-  };
+  }, [CHART_DATA]);
 
   // 取得最大SOC值
   const getMaxSOC = () => {
@@ -213,7 +226,7 @@ export const ReadCSV = () => {
         toolTipContent: "{name}：{y} %",
         name: "平均SOC",
         showInLegend: true,
-        dataPoints: handleAvgSOC(),
+        dataPoints: handleAvgSOC,
       },
       {
         type: "spline",
@@ -237,24 +250,6 @@ export const ReadCSV = () => {
     axisY: {
       title: "",
       viewportMinimum: -2,
-      // labelFormatter: function (status) {
-      //   switch (status) {
-      //     case 0:
-      //       return "初始化中" + status.value;
-      //     case 1:
-      //       return "正常" + status.value;
-      //     case 2:
-      //       return "滿充，SOC 100%" + status.value;
-      //     case 3:
-      //       return "滿充，SOC 0%" + status.value;
-      //     case 4:
-      //       return "系統警告" + status.value;
-      //     case 5:
-      //       return "系統錯誤" + status.value;
-      //     default:
-      //       return;
-      //   }
-      // },
     },
     legend: {
       fontFamily: "Arial",
