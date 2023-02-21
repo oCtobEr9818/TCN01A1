@@ -8,14 +8,14 @@ export const Nav = () => {
       path: "/",
       title: "首頁",
     },
-    {
-      path: "/instantAnalysis",
-      title: "即時分析",
-    },
-    {
-      path: "/historyAnalysis",
-      title: "歷史分析",
-    },
+    // {
+    //   path: "/instantAnalysis",
+    //   title: "即時分析",
+    // },
+    // {
+    //   path: "/historyAnalysis",
+    //   title: "歷史分析",
+    // },
     {
       path: "/readCSV",
       title: "讀取.csv檔",

@@ -41,11 +41,14 @@ html, body {
 .App .container #collapse-control:checked ~ label {
   left: 0;
 }
-.App .container #collapse-control:checked ~ .chart {
+.App .container #collapse-control:checked ~ .read_csv {
   width: 80%;
-  margin: 2rem auto;
+  margin: auto;
   position: static;
 }
+.App .container #collapse-control:checked ~ .read_csv .input-wrap {
+  margin: 0 auto;
+} /* 控制選單滑入和滑出後的畫面 */
 
 .App .container label {
   width: 25px;
@@ -131,75 +134,6 @@ html, body {
 }
 
 /* ************************************************************* */
-/* 即時分析 chart */
-.App .container .chart {
-  width: 75%;
-  height: 100%;
-  margin: 2rem 2rem 0 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: absolute;
-  left: 21rem;
-  top: 0;
-}
-
-/* 表格 */
-.App .container .chart .data-table {
-  display: inline-flex;
-  margin: auto;
-}
-.App .container .chart .data-table ul {
-  margin: 10px 0;
-}
-.App .container .chart .data-table ul li {
-  height: 20px;
-  padding: 5px 10px;
-  border: 1px solid #000;
-  border-collapse: collapse;
-  text-align: center;
-  transition: .15s;
-}
-.App .container .chart .data-table ul li:hover {
-  background-color: #ddd;
-}
-.App .container .chart .data-table ul:nth-child(2) li {
-  border-left: none;
-}
-.App .container .chart .data-table ul li:nth-of-type(n+2) {
-  border-top: none;
-}
-
-/* 圖表 */
-.App .container .chart .chart-wrap {
-  height: 50%;
-  margin-top: 2rem;
-  display: grid;
-  grid-template-columns: 50% 50%;
-  column-gap: 50px;
-}
-.App .container .chart .chart-wrap2 {
-  grid-template-columns: 33% 33% 33%;
-  position: relative;
-}
-
-.App .container .chart .chart-wrap #gauge {
-  margin: 0 auto;
-}
-
-.App .container .chart .chart-wrap .wrap {
-  height: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.App .container .chart .chart-wrap .wrap h2 {
-  margin-bottom: 1rem;
-}
-/* *************************************************************** */
-
 /* 讀取.csv檔 */
 .App .container .read_csv {
   width: 75%;
@@ -207,9 +141,13 @@ html, body {
   position: absolute;
   top: 0;
   left: 22rem;
+  /* display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 200px auto;
+  column-gap: 50px; */
 }
 
-.App .container .read_csv .button-wrap {
+.App .container .read_csv .input-wrap .button-wrap {
   width: 300px;
   display: flex;
   align-items: center;
@@ -217,30 +155,27 @@ html, body {
   background: #f0f0f0;
 }
 
-.App .container .read_csv .button-wrap input {
+.App .container .read_csv .input-wrap .button-wrap input {
   width: 180px;
   height: 25px;
   padding: 10px;
 }
 
-.App .container .read_csv .button-wrap button {
+.App .container .read_csv .input-wrap .button-wrap button {
   width: 70px;
   height: 25px;
 }
 
-.App .container .read_csv .data-wrap {
+.App .container .read_csv .input-wrap .data-wrap {
   margin-top: 1rem;
 }
 
-.App .container .read_csv .data-wrap ul {
+.App .container .read_csv .input-wrap .data-wrap ul {
   line-height: 1.5;
 }
 
 .App .container .read_csv .chart-wrap {
-  width: 100%;
+  width: 50%;
   margin: 2rem 0 0;
-  display: grid;
-  grid-template-columns: 50% 50%;
-  column-gap: 50px;
 }
 
