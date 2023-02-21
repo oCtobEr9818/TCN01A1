@@ -21,7 +21,7 @@ export const ReadCSV = () => {
 
   // 移除不需要資料項目
   parseCsv.forEach((item, index) => {
-    if (item[0].slice(0, 10) !== "02/20/2023") {
+    if (item[0].slice(6, 10) !== "2023") {
       parseCsv.splice(index, 1);
     }
   });
