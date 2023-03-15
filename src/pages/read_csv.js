@@ -65,9 +65,18 @@ export const ReadCSV = () => {
     };
   }, []);
 
-  // 室內外濕度資料
-  function processHumData(e) {
-    const datas = [[], [], [], [], []];
+  // 平均室內外濕度資料
+  const HOURS_COUNT = 24;
+
+  function processHumData() {
+    const __HumDatas = []; // 創建濕度資料的Array
+    for (let i = 0; i < 5; i++) {
+      let innerArray = [];
+      for (let j = 0; j < 24; j++) {
+        innerArray.push(0);
+      }
+      __HumDatas.push(innerArray);
+    }
 
     // 獲取需要資料的index
     function getHumDataIndex(e) {
@@ -86,17 +95,40 @@ export const ReadCSV = () => {
     // 移除不需要資料項目
     const humData = humDatas.filter((item) => item[0].slice(6, 10) === "2023");
 
-    // 將資料轉換成canvas.js圖表用格式
-    for (let i = 0; i < humData.length; i++) {
-      for (let j = 0; j < datas.length; j++) {
-        datas[j].push({
-          y: Number(humData[i][getHumDataIndex(j)]),
-          label: humData[i][0],
+    // 將資料做平均計算
+    for (let i = 0; i < HOURS_COUNT; i++) {
+      const hour = i < 10 ? "0" + i : i.toString(); // 時間少於二位數補0
+      let items = humData.filter((item) => item[0]?.slice(12, 14) === hour);
+
+      for (let j = 0; j < __HumDatas.length; j++) {
+        items.forEach((data) => {
+          __HumDatas[j][i] +=
+            (Number(data[getHumDataIndex(j)])
+              ? Number(data[getHumDataIndex(j)])
+              : 0) / items[i].length;
         });
       }
     }
 
-    return datas[e];
+    return __HumDatas;
+  }
+
+  function getHumData(index) {
+    let results = [[], [], [], [], []];
+    const data = processHumData();
+    const dates_times = humDatas[1]?.[0]?.slice(0, 10);
+
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < HOURS_COUNT; j++) {
+        const hour = j < 10 ? "0" + j : j.toString();
+        results[i].push({
+          label: `${dates_times}, ${hour}:00:00`,
+          y: twoDecimal(data[i][j] * 0.1),
+        });
+      }
+    }
+
+    return results[index];
   }
 
   // CanvasJS chart
@@ -126,7 +158,7 @@ export const ReadCSV = () => {
       {
         type: "spline",
         axisYIndex: 0,
-        toolTipContent: "Time：{label}<br />{name}：{y} ℃",
+        toolTipContent: "日期&時間：{label}<br />{name}：{y} ℃",
         name: "室內A1溫度",
         color: "#2828FF",
         showInLegend: true,
@@ -195,11 +227,11 @@ export const ReadCSV = () => {
       {
         type: "spline",
         axisYIndex: 0,
-        toolTipContent: "Time：{label}<br />{name}：{y} %",
+        toolTipContent: "日期&時間：{label}<br />{name}：{y} %",
         name: "室內A1濕度",
         color: "#2828FF",
         showInLegend: true,
-        dataPoints: processHumData(0),
+        dataPoints: getHumData(0),
       },
       {
         type: "spline",
@@ -208,7 +240,7 @@ export const ReadCSV = () => {
         name: "室內A2濕度",
         color: "#97CBFF",
         showInLegend: true,
-        dataPoints: processHumData(1),
+        dataPoints: getHumData(1),
       },
       {
         type: "spline",
@@ -217,7 +249,7 @@ export const ReadCSV = () => {
         name: "室內B1濕度",
         color: "#007500",
         showInLegend: true,
-        dataPoints: processHumData(2),
+        dataPoints: getHumData(2),
       },
       {
         type: "spline",
@@ -226,7 +258,7 @@ export const ReadCSV = () => {
         name: "室內B2濕度",
         color: "#82D900",
         showInLegend: true,
-        dataPoints: processHumData(3),
+        dataPoints: getHumData(3),
       },
       {
         type: "spline",
@@ -235,7 +267,7 @@ export const ReadCSV = () => {
         name: "室外濕度",
         color: "#FF2D2D",
         showInLegend: true,
-        dataPoints: processHumData(4),
+        dataPoints: getHumData(4),
       },
     ],
   };
