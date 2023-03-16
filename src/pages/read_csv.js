@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 
 import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
 import { papaparseData } from "../components/papa_parse";
@@ -67,8 +67,9 @@ export const ReadCSV = () => {
 
   // 平均室內外濕度資料
   const HOURS_COUNT = 24;
+  const targetColumns = ["0x221e", "0x221f", "0x2220", "0x2221", "0x2225"];
 
-  function processHumData() {
+  function processHumData(hum) {
     const __HumDatas = []; // 創建濕度資料的Array
     for (let i = 0; i < 5; i++) {
       let innerArray = [];
@@ -80,8 +81,7 @@ export const ReadCSV = () => {
 
     // 獲取需要資料的index
     function getHumDataIndex(e) {
-      const targetColumns = ["0x221e", "0x221f", "0x2220", "0x2221", "0x2225"];
-      const indexHum = humDatas[0]?.reduce((acc, curr, index) => {
+      const indexHum = hum[0]?.reduce((acc, curr, index) => {
         if (targetColumns.includes(curr)) {
           acc.push(index);
         }
@@ -93,11 +93,11 @@ export const ReadCSV = () => {
     }
 
     // 移除不需要資料項目
-    const humData = humDatas.filter((item) => item[0].slice(6, 10) === "2023");
+    const humData = hum.filter((item) => item[0].slice(6, 10) === "2023");
 
     // 將資料做平均計算
     for (let i = 0; i < HOURS_COUNT; i++) {
-      const hour = i < 10 ? "0" + i : i.toString(); // 時間少於二位數補0
+      const hour = i < 10 ? "0" + i : i.toString(); // 小時少於二位數補0
       let items = humData.filter((item) => item[0]?.slice(12, 14) === hour);
 
       for (let j = 0; j < __HumDatas.length; j++) {
@@ -113,20 +113,26 @@ export const ReadCSV = () => {
     return __HumDatas;
   }
 
-  function getHumData(index) {
-    let results = [[], [], [], [], []];
-    const data = processHumData();
-    const dates_times = humDatas[1]?.[0]?.slice(0, 10);
+  // 將濕度資料轉換成canvas.js用的資料格式
+  function GetHumData(index) {
+    const data = useMemo(() => processHumData(humDatas), []);
+    const dates_times = humDatas[1]?.[0]?.slice(0, 10); // 開啟的檔案日期
 
-    for (let i = 0; i < data.length; i++) {
-      for (let j = 0; j < HOURS_COUNT; j++) {
-        const hour = j < 10 ? "0" + j : j.toString();
-        results[i].push({
-          label: `${dates_times}, ${hour}:00:00`,
-          y: twoDecimal(data[i][j] * 0.1),
-        });
+    const results = useMemo(() => {
+      let results = [[], [], [], [], []];
+
+      for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < HOURS_COUNT; j++) {
+          const hour = j < 10 ? "0" + j : j.toString(); // 小時少於二位數補0
+          results[i].push({
+            label: `${dates_times}, ${hour}:00:00`,
+            y: twoDecimal(data[i][j]),
+          });
+        }
       }
-    }
+
+      return results;
+    }, [data, dates_times]);
 
     return results[index];
   }
@@ -231,7 +237,7 @@ export const ReadCSV = () => {
         name: "室內A1濕度",
         color: "#2828FF",
         showInLegend: true,
-        dataPoints: getHumData(0),
+        dataPoints: GetHumData(0),
       },
       {
         type: "spline",
@@ -240,7 +246,7 @@ export const ReadCSV = () => {
         name: "室內A2濕度",
         color: "#97CBFF",
         showInLegend: true,
-        dataPoints: getHumData(1),
+        dataPoints: GetHumData(1),
       },
       {
         type: "spline",
@@ -249,7 +255,7 @@ export const ReadCSV = () => {
         name: "室內B1濕度",
         color: "#007500",
         showInLegend: true,
-        dataPoints: getHumData(2),
+        dataPoints: GetHumData(2),
       },
       {
         type: "spline",
@@ -258,7 +264,7 @@ export const ReadCSV = () => {
         name: "室內B2濕度",
         color: "#82D900",
         showInLegend: true,
-        dataPoints: getHumData(3),
+        dataPoints: GetHumData(3),
       },
       {
         type: "spline",
@@ -267,7 +273,7 @@ export const ReadCSV = () => {
         name: "室外濕度",
         color: "#FF2D2D",
         showInLegend: true,
-        dataPoints: getHumData(4),
+        dataPoints: GetHumData(4),
       },
     ],
   };
