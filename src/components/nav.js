@@ -8,25 +8,15 @@ export const Nav = () => {
       path: "/",
       title: "首頁",
     },
-    // {
-    //   path: "/instantAnalysis",
-    //   title: "即時分析",
-    // },
-    // {
-    //   path: "/historyAnalysis",
-    //   title: "歷史分析",
-    // },
     {
       path: "/readCSV",
       title: "讀取.csv檔",
     },
   ];
 
+  // 控制選單收合的箭頭方向
   const [isChecked, setIsChecked] = useState(false);
-
-  const handleArrowDirect = () => {
-    setIsChecked((prev) => !prev);
-  };
+  const handleArrowDirect = () => setIsChecked((prev = true) => !prev);
 
   return (
     <>
@@ -41,6 +31,10 @@ export const Nav = () => {
         ) : (
           <i className="fa fa-arrow-left" aria-hidden="true"></i>
         )}
+        <div className="menu-line"></div>
+        <div className="menu-line1"></div>
+        <div className="menu-line2"></div>
+        <div className="menu-line3"></div>
       </label>
 
       <div className="nav-wrap">
