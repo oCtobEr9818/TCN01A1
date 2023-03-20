@@ -115,23 +115,23 @@ export const ReadCSV = () => {
 
   // 將濕度資料轉換成canvas.js用的資料格式
   function GetHumData(index) {
-    const data = useMemo(() => processHumData(humDatas), []);
+    const data = processHumData(humDatas);
     const dates_times = humDatas[1]?.[0]?.slice(0, 10); // 開啟的檔案日期
 
     const results = useMemo(() => {
-      let results = [[], [], [], [], []];
+      let res = [[], [], [], [], []];
 
       for (let i = 0; i < data.length; i++) {
         for (let j = 0; j < HOURS_COUNT; j++) {
           const hour = j < 10 ? "0" + j : j.toString(); // 小時少於二位數補0
-          results[i].push({
+          res[i].push({
             label: `${dates_times}, ${hour}:00:00`,
-            y: twoDecimal(data[i][j]),
+            y: twoDecimal(data[i][j] * scale),
           });
         }
       }
 
-      return results;
+      return res;
     }, [data, dates_times]);
 
     return results[index];
@@ -280,14 +280,14 @@ export const ReadCSV = () => {
 
   return (
     <div className="read_csv">
-      <div className="input-wrap">
+      <div className="input-wrap input-wrap1">
         <div className="button-wrap">
           <input type="file" accept=".csv" onChange={onChangetempInput} />
           <button onClick={handletempData}>讀取</button>
         </div>
       </div>
 
-      <div className="input-wrap">
+      <div className="input-wrap input-wrap2">
         <div className="button-wrap">
           <input type="file" accept=".csv" onChange={onChangeHumInput} />
           <button onClick={handleHumData}>讀取</button>
