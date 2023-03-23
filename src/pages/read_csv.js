@@ -25,6 +25,7 @@ export const ReadCSV = () => {
   useEffect(() => {
     setTempData(caculateChartData(chartData, tempColumns));
     setHumData(caculateChartData(chartData, humColumns));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartData]);
 
   // 獲取需要資料的index
