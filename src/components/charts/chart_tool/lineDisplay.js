@@ -5,6 +5,7 @@ export const lineDisplay = (e) => {
     e.dataSeries.toolTipContent = null;
   } else {
     e.dataSeries.visible = true;
+    e.dataSeries.toolTipContent = "{name}：{y} ℃";
   }
   e.chart.render();
 };

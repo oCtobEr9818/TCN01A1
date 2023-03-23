@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
 import { papaparseData } from "../components/papa_parse";
@@ -6,136 +6,95 @@ import { lineDisplay } from "../components/charts/chart_tool/lineDisplay";
 import { twoDecimal } from "../components/two_decimal";
 
 export const ReadCSV = () => {
+  const [chartData, setChartData] = useState([]);
+  const [chartFileName, setChartFileName] = useState("");
+
   const [tempData, setTempData] = useState([]);
-  const [tempFileName, setTempFileName] = useState("");
+  const [humData, setHumData] = useState([]);
 
-  const [humDatas, setHumDatas] = useState([]);
-  const [humFileName, setHumFileName] = useState("");
-
-  const onChangetempInput = (e) => setTempFileName(e.target.value);
+  const onChangetempInput = (e) => setChartFileName(e.target.value);
   const handletempData = () =>
-    papaparseData(setTempData, tempFileName.slice(12));
-
-  const onChangeHumInput = (e) => setHumFileName(e.target.value);
-  const handleHumData = () => papaparseData(setHumDatas, humFileName.slice(12));
+    papaparseData(setChartData, chartFileName.slice(12));
 
   const scale = 0.1;
-
-  // 處理溫度資料
-  const processTempData = useCallback((data) => {
-    let indoortemp_A1 = [];
-    let indoortemp_A2 = [];
-    let indoortemp_B1 = [];
-    let indoortemp_B2 = [];
-    let outdoortemp = [];
-
-    // 移除不需要資料項目
-    const filteredCsv = data.filter((item) => item[0].slice(6, 10) === "2023");
-
-    // 資料push到Array
-    filteredCsv.forEach((item) => {
-      indoortemp_A1.push({
-        y: twoDecimal(item[1]) * scale,
-        label: item[0],
-      });
-      indoortemp_A2.push({
-        y: twoDecimal(item[2]) * scale,
-        label: item[0],
-      });
-      indoortemp_B1.push({
-        y: twoDecimal(item[3]) * scale,
-        label: item[0],
-      });
-      indoortemp_B2.push({
-        y: twoDecimal(item[4]) * scale,
-        label: item[0],
-      });
-      outdoortemp.push({
-        y: twoDecimal(item[5]) * scale,
-        label: item[0],
-      });
-    });
-
-    return {
-      indoortemp_A1,
-      indoortemp_A2,
-      indoortemp_B1,
-      indoortemp_B2,
-      outdoortemp,
-    };
-  }, []);
-
-  // 平均室內外濕度資料
   const HOURS_COUNT = 24;
-  const targetColumns = ["0x221e", "0x221f", "0x2220", "0x2221", "0x2225"];
+  const tempColumns = ["0x221a", "0x221b", "0x221c", "0x221d", "0x2224"];
+  const humColumns = ["0x221e", "0x221f", "0x2220", "0x2221", "0x2225"];
 
-  function processHumData(hum) {
-    const __HumDatas = []; // 創建濕度資料的Array
+  // 監聽state change
+  useEffect(() => {
+    setTempData(caculateChartData(chartData, tempColumns));
+    setHumData(caculateChartData(chartData, humColumns));
+  }, [chartData]);
+
+  // 獲取需要資料的index
+  function getChartDataIndex(e, targetColumns) {
+    const __index = chartData[0]?.reduce((acc, curr, index) => {
+      if (targetColumns.includes(curr)) {
+        acc.push(index);
+      }
+
+      return acc;
+    }, []);
+
+    return __index[e];
+  }
+
+  // 計算濕度資料
+  const caculateChartData = (fn, indexColumns) => {
+    const __chartDatas = []; // 創建濕度資料的Array
     for (let i = 0; i < 5; i++) {
       let innerArray = [];
       for (let j = 0; j < 24; j++) {
         innerArray.push(0);
       }
-      __HumDatas.push(innerArray);
-    }
-
-    // 獲取需要資料的index
-    function getHumDataIndex(e) {
-      const indexHum = hum[0]?.reduce((acc, curr, index) => {
-        if (targetColumns.includes(curr)) {
-          acc.push(index);
-        }
-
-        return acc;
-      }, []);
-
-      return indexHum[e];
+      __chartDatas.push(innerArray);
     }
 
     // 移除不需要資料項目
-    const humData = hum.filter((item) => item[0].slice(6, 10) === "2023");
+    const filterChartData = fn.filter(
+      (item) => item[0].slice(6, 10) === "2023"
+    );
 
     // 將資料做平均計算
     for (let i = 0; i < HOURS_COUNT; i++) {
       const hour = i < 10 ? "0" + i : i.toString(); // 小時少於二位數補0
-      let items = humData.filter((item) => item[0]?.slice(12, 14) === hour);
+      let items = filterChartData.filter(
+        (item) => item[0]?.slice(12, 14) === hour
+      );
 
-      for (let j = 0; j < __HumDatas.length; j++) {
+      for (let j = 0; j < __chartDatas.length; j++) {
         items.forEach((data) => {
-          __HumDatas[j][i] +=
-            (Number(data[getHumDataIndex(j)])
-              ? Number(data[getHumDataIndex(j)])
-              : 0) / items[i].length;
+          __chartDatas[j][i] +=
+            (Number(data[getChartDataIndex(j, indexColumns)])
+              ? Number(data[getChartDataIndex(j, indexColumns)])
+              : 0) / items.length;
         });
       }
     }
 
-    return __HumDatas;
-  }
+    return __chartDatas;
+  };
 
   // 將濕度資料轉換成canvas.js用的資料格式
-  function GetHumData(index) {
-    const data = processHumData(humDatas);
-    const dates_times = humDatas[1]?.[0]?.slice(0, 10); // 開啟的檔案日期
+  const GetChartData = (index, fn) => {
+    const data = fn;
+    const dates_times = chartData[1]?.[0]?.slice(0, 10); // 開啟的檔案日期
 
-    const results = useMemo(() => {
-      let res = [[], [], [], [], []];
+    let res = [[], [], [], [], []];
 
-      for (let i = 0; i < data.length; i++) {
-        for (let j = 0; j < HOURS_COUNT; j++) {
-          const hour = j < 10 ? "0" + j : j.toString(); // 小時少於二位數補0
-          res[i].push({
-            label: `${dates_times}, ${hour}:00:00`,
-            y: twoDecimal(data[i][j] * scale),
-          });
-        }
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < HOURS_COUNT; j++) {
+        const hour = j < 10 ? "0" + j : j.toString(); // 小時少於二位數補0
+        res[i].push({
+          label: `${dates_times}, ${hour}:00:00`,
+          y: twoDecimal(data[i][j] * scale),
+        });
       }
+    }
 
-      return res;
-    }, [data, dates_times]);
-
-    return results[index];
-  }
+    return res[index];
+  };
 
   // CanvasJS chart
   const CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -168,7 +127,7 @@ export const ReadCSV = () => {
         name: "室內A1溫度",
         color: "#2828FF",
         showInLegend: true,
-        dataPoints: processTempData(tempData).indoortemp_A1,
+        dataPoints: GetChartData(0, tempData),
       },
       {
         type: "spline",
@@ -177,7 +136,7 @@ export const ReadCSV = () => {
         name: "室內A2溫度",
         color: "#97CBFF",
         showInLegend: true,
-        dataPoints: processTempData(tempData).indoortemp_A2,
+        dataPoints: GetChartData(1, tempData),
       },
       {
         type: "spline",
@@ -186,7 +145,7 @@ export const ReadCSV = () => {
         name: "室內B1溫度",
         color: "#007500",
         showInLegend: true,
-        dataPoints: processTempData(tempData).indoortemp_B1,
+        dataPoints: GetChartData(2, tempData),
       },
       {
         type: "spline",
@@ -195,7 +154,7 @@ export const ReadCSV = () => {
         name: "室內B2溫度",
         color: "#82D900",
         showInLegend: true,
-        dataPoints: processTempData(tempData).indoortemp_B2,
+        dataPoints: GetChartData(3, tempData),
       },
       {
         type: "spline",
@@ -204,7 +163,7 @@ export const ReadCSV = () => {
         name: "室外溫度",
         color: "#FF2D2D",
         showInLegend: true,
-        dataPoints: processTempData(tempData).outdoortemp,
+        dataPoints: GetChartData(4, tempData),
       },
     ],
   };
@@ -237,7 +196,7 @@ export const ReadCSV = () => {
         name: "室內A1濕度",
         color: "#2828FF",
         showInLegend: true,
-        dataPoints: GetHumData(0),
+        dataPoints: GetChartData(0, humData),
       },
       {
         type: "spline",
@@ -246,7 +205,7 @@ export const ReadCSV = () => {
         name: "室內A2濕度",
         color: "#97CBFF",
         showInLegend: true,
-        dataPoints: GetHumData(1),
+        dataPoints: GetChartData(1, humData),
       },
       {
         type: "spline",
@@ -255,7 +214,7 @@ export const ReadCSV = () => {
         name: "室內B1濕度",
         color: "#007500",
         showInLegend: true,
-        dataPoints: GetHumData(2),
+        dataPoints: GetChartData(2, humData),
       },
       {
         type: "spline",
@@ -264,7 +223,7 @@ export const ReadCSV = () => {
         name: "室內B2濕度",
         color: "#82D900",
         showInLegend: true,
-        dataPoints: GetHumData(3),
+        dataPoints: GetChartData(3, humData),
       },
       {
         type: "spline",
@@ -273,24 +232,17 @@ export const ReadCSV = () => {
         name: "室外濕度",
         color: "#FF2D2D",
         showInLegend: true,
-        dataPoints: GetHumData(4),
+        dataPoints: GetChartData(4, humData),
       },
     ],
   };
 
   return (
     <div className="read_csv">
-      <div className="input-wrap input-wrap1">
+      <div className="input-wrap">
         <div className="button-wrap">
           <input type="file" accept=".csv" onChange={onChangetempInput} />
           <button onClick={handletempData}>讀取</button>
-        </div>
-      </div>
-
-      <div className="input-wrap input-wrap2">
-        <div className="button-wrap">
-          <input type="file" accept=".csv" onChange={onChangeHumInput} />
-          <button onClick={handleHumData}>讀取</button>
         </div>
       </div>
 

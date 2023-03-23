@@ -17,9 +17,17 @@ html, body {
   height: 100%;
 }
 
-.App .container {
+.App {
   width: 100%;
-  min-height: 100vh;
+}
+
+.App .container {
+  height: 100vh;
+  padding-right: 50px;
+  display: grid;
+  grid-template-columns: 18rem auto;
+  gap: 40px;
+  overflow: hidden;
 }
 
 .App .container .chart h1 {
@@ -36,37 +44,19 @@ html, body {
   top: 0;
   left: 0;
 }
-.App .container #collapse-control:checked ~ .nav-wrap {
-  left: -18rem;
+.App .container #collapse-control:checked .nav-container .nav-wrap {
+  visibility: hidden;
 }
-.App .container #collapse-control:checked ~ label {
-  left: 0;
-}
-.App .container #collapse-control:checked ~ .read_csv {
-  width: 80%;
-  margin: auto;
-  position: static;
-}
-.App .container #collapse-control:checked ~ .read_csv .input-wrap {
-  margin: 0 auto;
-} /* 控制選單滑入和滑出後的畫面 */
 
 .App .container label {
-  width: 25px;
-  height: 50px;
-  margin: auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgb(229, 248, 198);
-  box-shadow: 2px 1px 0 rgba(0, 0, 0, .3);
   border-radius: 8px;
   cursor: pointer;
   transition: .3s;
   z-index: 2;
   position: absolute;
-  left: 17.6rem;
-  top: 45%;
 }
 .App .container label:hover .fa-arrow-left,
 .App .container label:hover .fa-arrow-right {
@@ -78,29 +68,26 @@ html, body {
   color: rgb(125, 118, 233);
 }
 
-.App .container .nav-wrap {
+.App .container .nav-container .nav-wrap {
   height: 100%;
   padding: 1rem 1.5rem;
   background: rgb(229, 248, 198);
   box-shadow: 2px 0 5px rgba(0, 0, 0, .3);
   transition: .3s;
-  position: absolute;
-  left: 0;
-  top: 0;
 }
 
-.App .container .nav-wrap .logo img {
+.App .container .nav-container .nav-wrap .logo img {
   width: 15rem;
   cursor: pointer;
   transition: .3s;
 }
 
-.App .container .nav-wrap .nav {
+.App .container .nav-container .nav-wrap .nav {
   width: 100%;
   margin: 2rem 0;
 }
 
-.App .container .nav-wrap .nav ul li button {
+.App .container .nav-container .nav-wrap .nav ul li button {
   width: 100%;
   border: 1px solid #bab;
   border-radius: 5px;
@@ -112,11 +99,11 @@ html, body {
   transition: .3s;
   cursor: pointer;
 }
-.App .container .nav-wrap .nav ul li button:hover {
+.App .container .nav-container .nav-wrap .nav ul li button:hover {
   color: #f7f7f7;
   background: rgb(103, 100, 146);
 }
-.App .container .nav-wrap .nav ul li button:visited {
+.App .container .nav-container .nav-wrap .nav ul li button:visited {
   color: rgb(125, 118, 233);
 }
 
@@ -134,15 +121,14 @@ html, body {
 /* ************************************************************* */
 /* 讀取.csv檔 */
 .App .container .read_csv {
-  width: 75%;
-  height: 100vh;
-  position: absolute;
-  top: 0;
-  left: 22rem;
   display: grid;
   grid-template-columns: 50% 50%;
   grid-template-rows: 200px auto;
-  column-gap: 50px;
+  column-gap: 20px;
+}
+
+.App .container .read_csv .input-wrap {
+  grid-area: 1 / 1 / 2 / 3;
 }
 
 .App .container .read_csv .input-wrap .button-wrap {
@@ -179,12 +165,18 @@ html, body {
 
 /* 筆電 */
 @media screen and (max-width: 1199px) {
-  .App .container label {
-    left: 14.5rem;
+  .App .container {
+    padding: 0;
   }
 
-  .App .container .nav-wrap .logo img {
-    width: 12rem;
+  .App .container .read_csv {
+    grid-template-columns: auto;
+    grid-template-rows: auto auto auto auto;
+    overflow-y: scroll;
+  }
+
+  .App .container .read_csv .chart-wrap {
+    margin-right: 1rem;
   }
 }
 
@@ -192,41 +184,38 @@ html, body {
 @media screen and (max-width: 991px) {
   .App .container {
     width: 100%;
+    grid-template-columns: auto;
+    grid-template-rows: 12rem auto;
   }
 
-  .App .container #collapse-control:checked ~ .nav-wrap {
-    left: 0;
-  }
-  .App .container #collapse-control:checked ~ .nav-wrap .nav {
+  .App .container #collapse-control:checked ~ .nav-container .nav-wrap .nav {
     height: 0;
     margin: 0;
-    visibility: hidden;
+    display: none;
   }
   .App .container #collapse-control:checked ~ label {
     top: 25px;
     left: 25px;
   }
 
-  .App .container .nav-wrap {
+  .App .container .nav-container .nav-wrap {
+    z-index: 1;
     width: 100%;
     height: auto;
     box-shadow: 0 2px 5px rgba(0, 0, 0, .3);
   }
 
-  .App .container .nav-wrap .logo {
-    height: 4rem;
-  }
-
-  .App .container .nav-wrap .logo img {
+  .App .container .nav-container .nav-wrap .logo img {
     width: 12rem;
     margin: auto;
     display: flex;
     justify-content: center;
   }
 
-  .App .container .nav-wrap .nav {
+  .App .container .nav-container .nav-wrap .nav {
     width: 100%;
-    margin: 1rem auto;
+    height: auto;
+    margin: 1rem 0;
   }
 
   .App .container label {
@@ -245,6 +234,7 @@ html, body {
     display: none;
   }
 
+  /* 選單按鈕 */
   .App .container label .menu-line {
     display: block;
     height: 4px;
@@ -270,16 +260,14 @@ html, body {
     border-radius: 10px;
     background: rgb(125, 118, 233);
   }
-  .App .container label .menu-line1 {
-    transform-origin: 0% 0%;
-    transition: transform 0.4s ease-in-out;
+
+  .App .container .read_csv .input-wrap {
+    padding-left: 2em;
+    grid-area: 1 / 1 / 1 / 1;
   }
-  .App .container label .menu-line2 {
-    transition: transform 0.2s ease-in-out;
-  }
-  .App .container label .menu-line3 {
-    transform-origin: 0% 100%;
-    transition: transform 0.4s ease-in-out;
+
+  .App .container .read_csv .chart-wrap {
+    margin-bottom: 4rem;
   }
 }
 
