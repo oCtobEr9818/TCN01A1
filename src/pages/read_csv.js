@@ -4,6 +4,7 @@ import CanvasJSReact from "../canvasjs-3.6.7/canvasjs.react";
 import { papaparseData } from "../components/papa_parse";
 import { lineDisplay } from "../components/charts/chart_tool/lineDisplay";
 import { twoDecimal } from "../components/two_decimal";
+import { formatDate } from "../components/formatDate";
 
 export const ReadCSV = () => {
   const [chartData, setChartData] = useState([]);
@@ -13,8 +14,17 @@ export const ReadCSV = () => {
   const [humData, setHumData] = useState([]);
 
   const onChangetempInput = (e) => setChartFileName(e.target.value);
-  const handletempData = () =>
-    papaparseData(setChartData, chartFileName.slice(12));
+  const handletempData = () => {
+    try {
+      papaparseData(setChartData, chartFileName.slice(12));
+    } catch (error) {
+      if (error.name === "Timeout") {
+        alert("讀取時間超時，請再試一次！");
+      } else {
+        console.log("錯誤資訊：", error);
+      }
+    }
+  };
 
   const scale = 0.1;
   const HOURS_COUNT = 24;
@@ -42,7 +52,7 @@ export const ReadCSV = () => {
   }
 
   // 計算濕度資料
-  const caculateChartData = (fn, indexColumns) => {
+  function caculateChartData(fn, indexColumns) {
     const __chartDatas = []; // 創建濕度資料的Array
     for (let i = 0; i < 5; i++) {
       let innerArray = [];
@@ -75,10 +85,10 @@ export const ReadCSV = () => {
     }
 
     return __chartDatas;
-  };
+  }
 
   // 將濕度資料轉換成canvas.js用的資料格式
-  const GetChartData = (index, fn) => {
+  function GetChartData(index, fn) {
     const data = fn;
     const dates_times = chartData[1]?.[0]?.slice(0, 10); // 開啟的檔案日期
 
@@ -95,7 +105,20 @@ export const ReadCSV = () => {
     }
 
     return res[index];
-  };
+  }
+
+  // log的時間範圍
+  function getStartEndDate(sd, ed) {
+    const filterData = chartData.filter(
+      (item) => item[0]?.slice(6, 10) === "2023"
+    );
+
+    const length = filterData.length;
+    sd = formatDate(filterData[0]?.[0]);
+    ed = formatDate(filterData[length - 1]?.[0]);
+
+    return sd + " ~ " + ed;
+  }
 
   // CanvasJS chart
   const CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -240,12 +263,16 @@ export const ReadCSV = () => {
 
   return (
     <div className="read_csv">
+      <h1>TCN01A1環控報表</h1>
       <div className="input-wrap">
         <div className="button-wrap">
           <input type="file" accept=".csv" onChange={onChangetempInput} />
           <button onClick={handletempData}>讀取</button>
         </div>
+        <label>時間範圍：{getStartEndDate()}</label>
       </div>
+
+      <div className="time-range"></div>
 
       <div className="chart-wrap">
         <CanvasJSChart options={options_temp} />

@@ -127,8 +127,14 @@ html, body {
   column-gap: 20px;
 }
 
+.App .container .read_csv h1 {
+  text-align: center;
+  margin-top: 2rem;
+  grid-area: 1 / 1 / 1 / 3;
+}
+
 .App .container .read_csv .input-wrap {
-  grid-area: 1 / 1 / 2 / 3;
+  grid-area: 2 / 1 / 3 / 2;
 }
 
 .App .container .read_csv .input-wrap .button-wrap {
@@ -148,6 +154,11 @@ html, body {
 .App .container .read_csv .input-wrap .button-wrap button {
   width: 70px;
   height: 25px;
+}
+
+.App .container .read_csv .input-wrap label {
+  margin-top: 1em;
+  cursor: text;
 }
 
 .App .container .read_csv .input-wrap .data-wrap {
