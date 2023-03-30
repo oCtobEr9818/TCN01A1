@@ -26,16 +26,14 @@ html, body {
   padding-right: 50px;
   display: grid;
   grid-template-columns: 18rem auto;
-  gap: 40px;
-  overflow: hidden;
+  column-gap: 15px;
+  overflow-x: hidden;
 }
 
 .App .container .chart h1 {
   margin: auto;
 }
 
-
-/* ************************************************************* */
 /* 選單 */
 .App .container #collapse-control {
   z-index: 10;
@@ -108,7 +106,6 @@ html, body {
 }
 
 
-/* ************************************************************* */
 /* 首頁 */
 .App .container .Home {
   width: 100%;
@@ -118,22 +115,23 @@ html, body {
   align-items: center;
 }
 
-/* ************************************************************* */
+
 /* 讀取.csv檔 */
 .App .container .read_csv {
   display: grid;
-  grid-template-columns: 50% 50%;
-  grid-template-rows: 200px auto;
-  column-gap: 20px;
+  grid-template-columns: 25% 25% 25% 25%;
+  grid-template-rows: 120px auto;
+  column-gap: 10px;
 }
 
 .App .container .read_csv h1 {
   text-align: center;
   margin-top: 2rem;
-  grid-area: 1 / 1 / 1 / 3;
+  grid-area: 1 / 2 / 1 / 4;
 }
 
 .App .container .read_csv .input-wrap {
+  margin-bottom: 2em;
   grid-area: 2 / 1 / 3 / 2;
 }
 
@@ -156,9 +154,12 @@ html, body {
   height: 25px;
 }
 
-.App .container .read_csv .input-wrap label {
+.App .container .read_csv .input-wrap .date-range {
+  display: block;
+  width: 450px;
   margin-top: 1em;
   cursor: text;
+  position: static;
 }
 
 .App .container .read_csv .input-wrap .data-wrap {
@@ -174,27 +175,23 @@ html, body {
   margin: 2rem 0 0;
 }
 
-/* 筆電 */
-@media screen and (max-width: 1199px) {
-  .App .container {
-    padding: 0;
-  }
-
-  .App .container .read_csv {
-    grid-template-columns: auto;
-    grid-template-rows: auto auto auto auto;
-    overflow-y: scroll;
-  }
-
-  .App .container .read_csv .chart-wrap {
-    margin-right: 1rem;
-  }
+.App .container .read_csv .chart-wrap1 {
+  grid-area: 3 / 1 / 4 / 3;
 }
+.App .container .read_csv .chart-wrap2 {
+  grid-area: 3 / 3 / 4 / 5;
+}
+.App .container .read_csv .chart-wrap3 {
+  grid-area: 4 / 2 / 5 / 4;
+  margin-bottom: 2em;
+}
+
 
 /* 平板 */
 @media screen and (max-width: 991px) {
   .App .container {
     width: 100%;
+    padding: 0;
     grid-template-columns: auto;
     grid-template-rows: 12rem auto;
   }
@@ -207,6 +204,15 @@ html, body {
   .App .container #collapse-control:checked ~ label {
     top: 25px;
     left: 25px;
+  }
+
+  .App .container .nav-container {
+    width: 100%;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
   }
 
   .App .container .nav-container .nav-wrap {
@@ -272,13 +278,44 @@ html, body {
     background: rgb(125, 118, 233);
   }
 
+  .App .container .read_csv {
+    width: 100%;
+    height: 200vh;
+    margin-top: 15em;
+    grid-template-columns: auto;
+    grid-template-rows: 5% 5% 30% 30% 30%;
+    column-gap: 0;
+    row-gap: 3em;
+  }
+
+  .App .container .read_csv h1 {
+    text-align: center;
+    margin-top: 2rem;
+    grid-area: 1 / 1 / 1 / 1;
+  }
+
   .App .container .read_csv .input-wrap {
     padding-left: 2em;
-    grid-area: 1 / 1 / 1 / 1;
+    grid-area: 2 / 1 / 3 / 1;
+  }
+
+  .App .container .read_csv .input-wrap .date-range {
+    padding: 0;
+    border: none;
   }
 
   .App .container .read_csv .chart-wrap {
     margin-bottom: 4rem;
+  }
+
+  .App .container .read_csv .chart-wrap1 {
+    grid-area: 3 / 1 / 4 / 1;
+  }
+  .App .container .read_csv .chart-wrap2 {
+    grid-area: 4 / 1 / 5 / 1;
+  }
+  .App .container .read_csv .chart-wrap3 {
+    grid-area: 5 / 1 / 6 / 1;
   }
 }
 
