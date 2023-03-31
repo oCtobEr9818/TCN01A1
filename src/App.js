@@ -8,7 +8,7 @@ function App() {
   return (
     <div className="App">
       <div className="container">
-        <BrowserRouter>
+        <BrowserRouter basename="/TCN01A1">
           <Nav />
 
           <Routes>
